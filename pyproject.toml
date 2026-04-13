@@ -1,0 +1,96 @@
+[build-system]
+requires = ["setuptools>=45", "wheel", "setuptools_scm>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dna-codec-advanced"
+dynamic = ["version"]
+description = "Advanced DNA Encoder/Decoder System v3.0 - Container Protocol for Robust Data Storage"
+readme = "README.md"
+license = {file = "LICENSE"}
+authors = [
+    {name = "Francisco Molina", email = "pako.molina@gmail.com"},
+]
+maintainers = [
+    {name = "Francisco Molina", email = "pako.molina@gmail.com"},
+]
+keywords = [
+    "bioinformatics",
+    "dna-storage", 
+    "data-archival",
+    "synthetic-biology",
+    "encryption",
+    "reed-solomon",
+    "error-correction",
+    "genomics",
+    "biotechnology",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "License :: OSI Approved :: GNU Affero General Public License v3",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9", 
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+]
+requires-python = ">=3.8"
+dependencies = [
+    "numpy>=1.21.0",
+    "beautifulsoup4>=4.9.3",
+    "requests>=2.25.1",
+    "cryptography>=3.4.8",
+    "reedsolo>=1.5.4",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=6.0",
+    "pytest-cov>=2.10",
+    "black>=21.0",
+    "flake8>=3.8",
+    "mypy>=0.800",
+]
+full = [
+    "matplotlib>=3.0",
+    "seaborn>=0.11", 
+    "jupyter>=1.0",
+    "notebook>=6.0",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/Yatrogenesis/DNA-Codec-Advanced"
+"Bug Reports" = "https://github.com/Yatrogenesis/DNA-Codec-Advanced/issues"
+"Source" = "https://github.com/Yatrogenesis/DNA-Codec-Advanced"
+"Documentation" = "https://github.com/Yatrogenesis/DNA-Codec-Advanced#readme"
+
+[project.scripts]
+dna-codec = "cli_interface:main"
+dna-encode = "cli_interface:cli_encode_wrapper"
+dna-decode = "cli_interface:cli_decode_wrapper"
+
+[tool.setuptools]
+packages = ["dna_codec_advanced"]
+
+[tool.setuptools.package-data]
+"*" = ["*.md", "*.txt", "*.fasta", "*.ipynb"]
+
+[tool.black]
+line-length = 100
+target-version = ['py38', 'py39', 'py310', 'py311']
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+addopts = "--cov=dna_codec_advanced --cov-report=html --cov-report=term"
