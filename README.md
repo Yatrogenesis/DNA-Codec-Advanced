@@ -3,6 +3,7 @@
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![ORCID](https://img.shields.io/badge/ORCID-0009--0008--6093--8267-green.svg)](https://orcid.org/0009-0008-6093-8267)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20444764.svg)](https://doi.org/10.5281/zenodo.20444764)
 
 **Author:** Francisco Molina-Burgos  
 **ORCID:** 0009-0008-6093-8267  
@@ -142,11 +143,12 @@ For commercial licensing: pako.molina@gmail.com
 If you use DNA Codec v3.0 in your research, please cite:
 
 ```bibtex
-@software{molina2024dnacodec,
+@software{molina2025dnacodec,
   title={DNA Codec v3.0: Self-Descriptive Container Protocol for Robust DNA Data Storage},
   author={Molina-Burgos, Francisco},
-  year={2024},
-  url={https://github.com/Yatrogenesis/DNA-Codec-Advanced},
+  year={2025},
+  doi={10.5281/zenodo.20444764},
+  url={https://doi.org/10.5281/zenodo.20444764},
   orcid={0009-0008-6093-8267}
 }
 ```
