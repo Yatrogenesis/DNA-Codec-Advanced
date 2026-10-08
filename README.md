@@ -18,9 +18,9 @@ DNA Codec v3.0 implements a self-descriptive container protocol for encoding arb
 ### Key Technical Contributions
 
 - **Container Protocol v3.0** — Self-descriptive DNA containers with unique 12-nucleotide boundary markers (collision probability: 1 in 16.7 million), explicit length fields, and per-container checksums
-- **Reed-Solomon Error Correction** — Mathematical recovery from up to 25% sequence corruption; validated across 100 independent replicates
-- **Biological Cryptography** — AES-256-GCM encryption with PBKDF2-HMAC-SHA256 key derivation (100,000 iterations) from physical DNA sequences
-- **Multi-Platform Biological Simulation** — Realistic sequencing error models for Illumina, Oxford Nanopore, PacBio, and synthesis platforms
+- **Reed-Solomon parity (byte level)** — uses the `reedsolo` library with 10 parity symbols per block, which can correct a small, bounded number of corrupted bytes per block. It does not by itself correct DNA insertions or deletions, and no corruption-recovery rate has been measured and archived in this repository.
+- **Optional encryption** — AES-256-GCM with a key derived by PBKDF2-HMAC-SHA256 (100,000 iterations) from a user-supplied DNA string. This is password-style key derivation, not a physical or biological authentication factor, and the KDF salt is a fixed constant in this release (see Known limitations).
+- **Sequencing error simulation** — simple error models for Illumina, Oxford Nanopore, PacBio and synthesis platforms (`simulator.py`); they are not calibrated against published instrument error profiles.
 
 ### Container Structure
 
@@ -54,71 +54,41 @@ pip install -r requirements.txt matplotlib seaborn jupyter
 
 ## Quick Start
 
-```bash
-# Encode a file to DNA
-python cli_interface.py encode document.pdf --output dna_sequence.fasta
-
-# Decode DNA back to original
-python cli_interface.py decode dna_sequence.fasta --output recovered_document.pdf
-
-# Validate sequence for physical synthesis
-python cli_interface.py validate dna_sequence.fasta --detailed
-
-# Analyze GC content, homopolymers, synthesis constraints
-python cli_interface.py analyze dna_sequence.fasta
-```
+There is **no working command-line interface in this release**: the `cli_interface.py` module referenced by earlier
+versions of this README and by `dna_codec_advanced/cli.py` / `setup.py` is not part of the repository. Use the Python API below.
 
 ## Python API
 
+Encryption and Reed-Solomon protection are **disabled by default**; enable them explicitly.
+
 ```python
-from dna_codec_advanced import DNACodecAdvanced
+from dna_codec_advanced import ContainerDNACodec
 
-codec = DNACodecAdvanced()
+codec = ContainerDNACodec()                      # plain containers
+dna = codec.encode(open("data.bin", "rb").read())  # bytes (or str) -> DNA string
+data, metadata = codec.decode(dna)               # -> (bytes, dict)
 
-# Encode
-with open("data.bin", "rb") as f:
-    dna = codec.encode(f.read())
-
-# Optional: biological key encryption
-codec.set_biological_key("ATCGATCGATCG")
-dna_encrypted = codec.encode(data)
-
-# Decode
-recovered = codec.decode(dna)
+# Optional features (both off unless requested)
+codec = ContainerDNACodec(enable_encryption=True, enable_reed_solomon=True)
+codec.set_biological_key("ATCGATCGATCGATCGATCGATCGATCGATCG")  # DNA string of at least 30 bases
+dna_encrypted = codec.encode(b"secret")
+data, metadata = codec.decode(dna_encrypted)
 ```
 
-## Statistical Validation
+## Validation status
 
-The implementation has been validated against 100 independent replicates with real genomic data:
-
-```bash
-python statistical_validation.py
-```
-
-Results are reported in the companion article (see `article/`).
-
-## Article
-
-The full scientific article describing the Container Protocol v3.0 design, validation methodology, and comparative analysis is available in `article/`:
-
-- `DNA_Codec_Article_FINAL.pdf` — Publication-ready manuscript
-- `DNA_Codec_Article_FINAL.tex` — LaTeX source
-- `references.bib` — Bibliography
-- `figures/` — Publication-quality figures (600 DPI)
-
-**Target journals:** Nature Biotechnology, Nature Communications, Bioinformatics
+This repository does **not** contain archived statistical validation results. The notebook `benchmark_colab_T4.ipynb`
+is a benchmark script whose outputs are not stored here, and any figures produced from simulated error models are
+synthetic, not experimental sequencing data. Claims about recovery rates, throughput or comparisons with other
+systems should be treated as unverified until raw results, environment and seeds are published.
 
 ## Repository Structure
 
 ```
-dna_codec_advanced/    — Core Python package
-cli_interface.py       — Command-line interface
-dna_codec_v3.py        — Main codec implementation (2,500+ lines)
-statistical_validation.py  — Validation experiments
-tests/                 — Test suite (220+ unit tests)
-genome_data/           — Test genomic data (GRCh38 chr22)
-article/               — Scientific publication package
-Figure_Generator_COMPLETE.ipynb  — Publication figure generator
+dna_codec_advanced/    — Python package (codec.py, simulator.py, downloader.py; cli.py is not functional, see above)
+dna_codec_v3.py        — Single-file codec implementation
+tests/                 — Unit tests (tests/test_dna_codec.py, 16 test functions)
+benchmark_colab_T4.ipynb — Benchmark notebook (outputs not archived)
 ```
 
 ## Running Tests
@@ -137,6 +107,24 @@ AGPL-3.0 means:
 - Commercial proprietary use: requires a separate commercial license
 
 For commercial licensing: pako.molina@gmail.com
+
+## Known limitations
+
+- The key-derivation salt used by `set_biological_key` is a fixed constant, so equal inputs give equal keys across installations.
+- Reed-Solomon protection is byte-level; DNA insertions/deletions are not corrected by it.
+- The command-line entry points declared in earlier packaging do not exist in this release.
+- The unit tests import the single-file `dna_codec_v3.py`, not the `dna_codec_advanced` package, so the package itself has no automated test coverage (the coverage report shows 0 % for it); no coverage figure should be quoted.
+
+## Data sources and attribution
+
+`HumanGenomeDownloader` fetches reference sequences from Ensembl (`ftp.ensembl.org`). Ensembl data may be used and
+redistributed, including commercially, with attribution: Cunningham F. et al., *Ensembl 2022*, Nucleic Acids Research
+(doi:10.1093/nar/gkab1049).
+
+## License note
+
+The code is licensed under **AGPL-3.0** (see `LICENSE`). The archived Zenodo record for v3.0.0 may display a different
+license (CC-BY-4.0) because its metadata was set when it was deposited; the repository license governs the code.
 
 ## Citation
 

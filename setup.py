@@ -37,7 +37,7 @@ setup(
         "Intended Audience :: Science/Research",
         "Topic :: Scientific/Engineering :: Bio-Informatics",
         "Topic :: Scientific/Engineering :: Information Analysis",
-        "License :: OSI Approved :: MIT License",
+        "License :: OSI Approved :: GNU Affero General Public License v3",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
@@ -63,13 +63,6 @@ setup(
             "seaborn>=0.11",
             "jupyter>=1.0",
             "notebook>=6.0",
-        ],
-    },
-    entry_points={
-        "console_scripts": [
-            "dna-codec=cli_interface:main",
-            "dna-encode=cli_interface:cli_encode_wrapper",
-            "dna-decode=cli_interface:cli_decode_wrapper",
         ],
     },
     keywords=[
