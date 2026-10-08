@@ -20,7 +20,7 @@ Usage:
     >>> decoded, metadata = codec.decode(encoded)
 
 Author: Francisco Molina (ORCID: 0009-0008-6093-8267)
-License: MIT
+License: AGPL-3.0
 """
 
 from .codec import ContainerDNACodec, DNAContainer
@@ -30,7 +30,7 @@ from .downloader import HumanGenomeDownloader
 __version__ = "3.0.0"
 __author__ = "Francisco Molina"
 __email__ = "pako.molina@gmail.com"
-__license__ = "MIT"
+__license__ = "AGPL-3.0-only"
 
 __all__ = [
     "ContainerDNACodec",
