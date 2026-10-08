@@ -27,7 +27,7 @@ from .codec import ContainerDNACodec, DNAContainer
 from .simulator import BiologicalSequencingSimulator
 from .downloader import HumanGenomeDownloader
 
-__version__ = "3.0.0"
+__version__ = "3.0.1"
 __author__ = "Francisco Molina"
 __email__ = "pako.molina@gmail.com"
 __license__ = "AGPL-3.0-only"

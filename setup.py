@@ -15,7 +15,7 @@ with open("requirements.txt", "r", encoding="utf-8") as fh:
     requirements = [line.strip() for line in fh if line.strip() and not line.startswith("#")]
 
 # Version handling
-version = "3.0.0"
+version = "3.0.1"
 
 setup(
     name="dna-codec-advanced",

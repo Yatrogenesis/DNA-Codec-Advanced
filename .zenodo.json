@@ -1,0 +1,27 @@
+{
+  "title": "DNA Codec v3: Self-Descriptive Container Protocol for DNA Data Storage",
+  "upload_type": "software",
+  "creators": [
+    {
+      "name": "Molina-Burgos, Francisco",
+      "orcid": "0009-0008-6093-8267",
+      "affiliation": "Avermex Research Division"
+    }
+  ],
+  "license": "agpl-3.0-or-later",
+  "description": "<p>Python implementation of a self-descriptive container protocol that encodes binary data into DNA sequences, with optional AES-256-GCM encryption and byte-level Reed-Solomon parity. Research code. Version 3.0.1 corrects the documentation to match the repository (no unsupported recovery-rate or validation claims, real API, known limitations) and aligns the license metadata to AGPL-3.0.</p>",
+  "keywords": [
+    "DNA data storage",
+    "error correction",
+    "Reed-Solomon",
+    "container protocol",
+    "bioinformatics"
+  ],
+  "related_identifiers": [
+    {
+      "relation": "isSupplementTo",
+      "identifier": "https://github.com/Yatrogenesis/DNA-Codec-Advanced",
+      "scheme": "url"
+    }
+  ]
+}
