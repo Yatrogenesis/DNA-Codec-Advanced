@@ -9,7 +9,7 @@
     }
   ],
   "license": "agpl-3.0-or-later",
-  "description": "<p>Python implementation of a self-descriptive container protocol that encodes binary data into DNA sequences, with optional AES-256-GCM encryption and byte-level Reed-Solomon parity. Research code. Version 3.0.1 corrects the documentation to match the repository (no unsupported recovery-rate or validation claims, real API, known limitations) and aligns the license metadata to AGPL-3.0.</p>",
+  "description": "<p>Python implementation of a self-descriptive container protocol that encodes binary data into DNA sequences, with optional AES-256-GCM encryption and byte-level Reed-Solomon parity. Research code. Version 3.0.1 corrects the documentation to match the repository (no unsupported recovery-rate or validation claims, real API, known limitations) and aligns the license metadata to AGPL-3.0. Version 3.0.2 fixes Reed-Solomon: parity is now applied after compression and encryption, and damaged REED_SOLOMON containers are kept so the parity can repair them (before, a single substitution was never corrected).</p>",
   "keywords": [
     "DNA data storage",
     "error correction",

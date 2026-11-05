@@ -247,7 +247,7 @@ class ContainerDNACodec:
         try:
             # Agregar códigos de corrección
             encoded_data = self.rs_codec.encode(data)
-            return encoded_data
+            return bytes(encoded_data)
         except Exception as e:
             logging.warning(f"Reed-Solomon encoding failed: {e}")
             return data
@@ -264,7 +264,7 @@ class ContainerDNACodec:
             if corrected_error_pos or corrected_erase_pos:
                 logging.info(f"Reed-Solomon corrected {len(corrected_error_pos)} errors and {len(corrected_erase_pos)} erasures")
             
-            return corrected_data
+            return bytes(corrected_data)
         except Exception as e:
             logging.warning(f"Reed-Solomon decoding failed: {e}")
             return data
@@ -414,8 +414,10 @@ class ContainerDNACodec:
             expected_checksum = self._calculate_container_checksum(content_bytes)
             expected_checksum_dna = self._bytes_to_dna(expected_checksum.encode('ascii'))[:self.CHECKSUM_LENGTH]
             
-            # Verificar checksum
-            if checksum_dna != expected_checksum_dna:
+            # Verificar checksum. A damaged Reed-Solomon container is kept: discarding it would remove the
+            # very bytes that the outer Reed-Solomon code is able to correct.
+            damaged = checksum_dna != expected_checksum_dna
+            if damaged and container_type != 'REED_SOLOMON':
                 return None, start_pos + 1
             
             # Verificar marcador de fin
@@ -468,17 +470,17 @@ class ContainerDNACodec:
         global_checksum = self._calculate_checksum(data_bytes)
         original_size = len(data_bytes)
         
-        # Aplicar Reed-Solomon si está habilitado
-        processed_data = self._apply_reed_solomon(data_bytes) if self.enable_reed_solomon else data_bytes
+        # Order matters: compress, then encrypt, then Reed-Solomon last, so the parity protects exactly the
+        # bytes written to DNA (an error in compressed or encrypted bytes cannot be repaired afterwards).
+        processed_data, was_compressed = self._compress_data(data_bytes)
         
-        # Comprimir si es beneficioso
-        processed_data, was_compressed = self._compress_data(processed_data)
-        
-        # Encriptar si está habilitado
         was_encrypted = False
         if self.enable_encryption and self.biological_key:
             processed_data = self._encrypt_data(processed_data)
             was_encrypted = True
+        
+        if self.enable_reed_solomon:
+            processed_data = self._apply_reed_solomon(processed_data)
         
         # Crear metadatos del archivo
         file_metadata = {
@@ -505,10 +507,10 @@ class ContainerDNACodec:
             chunk = processed_data[i:i + self.max_container_size]
             
             # Determinar tipo de contenedor
-            if was_encrypted:
-                container_type = 'ENCRYPTED'
-            elif self.enable_reed_solomon:
+            if self.enable_reed_solomon:
                 container_type = 'REED_SOLOMON'
+            elif was_encrypted:
+                container_type = 'ENCRYPTED'
             elif was_compressed:
                 container_type = 'COMPRESSED'
             else:
@@ -597,6 +599,15 @@ class ContainerDNACodec:
             # Concatenar datos en orden
             reconstructed_data = b''.join(container.data for container in data_containers)
         
+        # Recuperar Reed-Solomon si es necesario
+        was_reed_solomon = file_metadata.get('reed_solomon', False)
+        if was_reed_solomon:
+            try:
+                reconstructed_data = self._recover_reed_solomon(reconstructed_data)
+            except Exception as e:
+                errors.append(f"Error en Reed-Solomon: {e}")
+        
+
         # Desencriptar si es necesario
         was_encrypted = file_metadata.get('encrypted', False)
         if was_encrypted:
@@ -612,14 +623,6 @@ class ContainerDNACodec:
             reconstructed_data = self._decompress_data(reconstructed_data, was_compressed)
         except Exception as e:
             errors.append(f"Error en descompresión: {e}")
-        
-        # Recuperar Reed-Solomon si es necesario
-        was_reed_solomon = file_metadata.get('reed_solomon', False)
-        if was_reed_solomon:
-            try:
-                reconstructed_data = self._recover_reed_solomon(reconstructed_data)
-            except Exception as e:
-                errors.append(f"Error en Reed-Solomon: {e}")
         
         # Verificar checksum global
         checksum_valid = False

@@ -18,7 +18,7 @@ DNA Codec v3.0 implements a self-descriptive container protocol for encoding arb
 ### Key Technical Contributions
 
 - **Container Protocol v3.0** — Self-descriptive DNA containers with unique 12-nucleotide boundary markers (collision probability: 1 in 16.7 million), explicit length fields, and per-container checksums
-- **Reed-Solomon parity (byte level)** — uses the `reedsolo` library with 10 parity symbols per block, which can correct a small, bounded number of corrupted bytes per block. It does not by itself correct DNA insertions or deletions, and no corruption-recovery rate has been measured and archived in this repository.
+- **Reed-Solomon parity (byte level)** — `reedsolo` with 10 parity symbols per 255-byte block (up to 5 corrupted bytes per block). Since 3.0.2 the parity is the outermost layer (applied after compression and encryption) and a damaged REED_SOLOMON container is kept instead of discarded, so substitutions in the payload are repaired. Measured on 5,000 random bytes, 20 trials each (random substitutions anywhere in the sequence): 1 substitution 19/20 recovered, 5 -> 16/20, 10 -> 14/20, 20 -> 5/20; without Reed-Solomon 0/20 in every case. Losses come from substitutions in markers, type/length fields or the (unprotected) metadata container. Insertions and deletions are not corrected.
 - **Optional encryption** — AES-256-GCM with a key derived by PBKDF2-HMAC-SHA256 (100,000 iterations) from a user-supplied DNA string. This is password-style key derivation, not a physical or biological authentication factor, and the KDF salt is a fixed constant in this release (see Known limitations).
 - **Sequencing error simulation** — simple error models for Illumina, Oxford Nanopore, PacBio and synthesis platforms (`simulator.py`); they are not calibrated against published instrument error profiles.
 
@@ -87,7 +87,7 @@ systems should be treated as unverified until raw results, environment and seeds
 ```
 dna_codec_advanced/    — Python package (codec.py, simulator.py, downloader.py; cli.py is not functional, see above)
 dna_codec_v3.py        — Single-file codec implementation
-tests/                 — Unit tests (tests/test_dna_codec.py, 16 test functions)
+tests/                 — Unit tests (21 tests, including Reed-Solomon recovery regression tests)
 benchmark_colab_T4.ipynb — Benchmark notebook (outputs not archived)
 ```
 
@@ -111,7 +111,8 @@ For commercial licensing: pako.molina@gmail.com
 ## Known limitations
 
 - The key-derivation salt used by `set_biological_key` is a fixed constant, so equal inputs give equal keys across installations.
-- Reed-Solomon protection is byte-level; DNA insertions/deletions are not corrected by it.
+- Reed-Solomon protection is byte-level; DNA insertions/deletions are not corrected by it, and the metadata container, markers and length fields are not protected by it.
+- No homopolymer or GC-content constraint is applied (runs of 8 identical bases occur), which real synthesis and sequencing penalise.
 - The command-line entry points declared in earlier packaging do not exist in this release.
 - The unit tests import the single-file `dna_codec_v3.py`, not the `dna_codec_advanced` package, so the package itself has no automated test coverage (the coverage report shows 0 % for it); no coverage figure should be quoted.
 

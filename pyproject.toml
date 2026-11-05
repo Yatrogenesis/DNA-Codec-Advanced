@@ -93,4 +93,5 @@ disallow_untyped_defs = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py", "*_test.py"]
-addopts = "--cov=dna_codec_advanced --cov-report=html --cov-report=term"
+# Coverage is optional: run `pytest --cov=dna_codec_advanced` when pytest-cov is installed.
+addopts = ""
